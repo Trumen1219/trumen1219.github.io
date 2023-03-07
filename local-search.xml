@@ -4,13 +4,19 @@
   
   
   <entry>
-    <title>测试文章</title>
-    <link href="/2023/03/07/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/"/>
-    <url>/2023/03/07/%E6%B5%8B%E8%AF%95%E6%96%87%E7%AB%A0/</url>
+    <title>Vue3-Study</title>
+    <link href="/2023/03/07/Vue3-Study/"/>
+    <url>/2023/03/07/Vue3-Study/</url>
     
-    <content type="html"><![CDATA[<p><img src="https://postimg.cc/wtxypk1g" alt="图片引用方法三"></p>]]></content>
+    <content type="html"><![CDATA[<p><img src="https://static.vue-js.com/6280b990-ff19-11ea-85f6-6fac77c0c9b3.png" alt="Vue3"></p><p><a href="/trumen-blog/source/aboutVue3/index.md">关于Vue3</a></p>]]></content>
     
     
+    
+    <tags>
+      
+      <tag>Vue3</tag>
+      
+    </tags>
     
   </entry>
   
