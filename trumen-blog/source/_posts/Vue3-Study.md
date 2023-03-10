@@ -21,7 +21,7 @@ github上的tags地址：https://github.com/vuejs/vue-next/releases/tag/v3.0.0
 ## 二.Vue3带来了什么
 
 ### 1.性能的提升
-=
+
 * 打包大小减少41%
 
 * 初次渲染快55%, 更新渲染快133%
@@ -84,21 +84,18 @@ data 选项应始终被声明为一个函数
 
 查看@vue/cli版本，确保@vue/cli版本在4.5.0以上
 
+```javascript
+## 查看@vue/cli版本，确保@vue/cli版本在4.5.0以上
 vue --version
-
-安装或者升级你的@vue/cli
-
+## 安装或者升级你的@vue/cli
 npm install -g @vue/cli
-
-创建
-
+## 创建Vue项目，选择Vue3
 vue create vue_test
-
-启动
-
+## 启动
 cd vue_test
-
 npm run serve
+```
+【还可以使用可视化界面创建：输入命令  vue ui 】
 
 ### 2.使用 vite 创建
 
@@ -110,99 +107,240 @@ vite官网：https://vitejs.cn
 
 优势如下：
 
-开发环境中，无需打包操作，可快速的冷启动。
+* 开发环境中，无需打包操作，可快速的冷启动。
 
-轻量快速的热重载（HMR）。
+* 轻量快速的热重载（HMR）。
 
-真正的按需编译，不再等待整个应用编译完成。
+* 真正的按需编译，不再等待整个应用编译完成。
 
 传统构建 与 vite构建对比图
 
-【图片】
+[![image.png](https://i.postimg.cc/5NB3hS8X/image.png)](https://postimg.cc/D8zLssjh)
 
-创建工程
+传统构建模式，是将所有资源都打包好，再上线
 
+[![image.png](https://i.postimg.cc/nrPC55Ty/image.png)](https://postimg.cc/Fk0rkTMp)
+
+而Vite有点按需加载的意思了。
+
+《创建工程》
+
+```javascript
 npm init vite-app <project-name>
-
 进入工程目录
-
 cd <project-name>
-
 安装依赖
-
 npm install
-
 运行
-
 npm run dev
+```
+【vite的构建速度更快】
 
 ### 3.分析工程结构
 
-构造函数需要new 工厂函数直接使用
+构造函数需要new  ； 工厂函数直接使用
+
+**>>main.js**
+
+Vue2项目中的main.js
+
+```javascript
+import Vue from 'vue'
+import App from './App.vue'
+
+Vue.config.productionTip = false
+
+const vm = new Vue({
+  render:h => h(app),
+})
+vm.$mount('#app')
+```
+
+Vue3项目中的main.js
+```javascript
+import { createApp } from 'vue'
+import App from './App.vue'
+createApp(App).mount('#app')
+```
+
+《对比》
+```javascript
+// 引入的不再是Vue构造函数了，引入的是一个名为createApp的工厂函数
+import { createApp } from 'vue'
+import App from './App.vue'
+
+// 创建应用实例对象——app(类似于之前Vue2中的vm，但app比vm更“轻”)
+const app = createApp(App)
+console.log(app)
+// 挂载
+app.mount('#app')
+```
+
+**>>App.vue**
 
 【vue3 template中可无根标签】
 
 ### 4.常用 Composition API
 
-官方文档: https://v3.cn.vuejs.org/guide/composition-api-introduction.html
+在Vue2中，我们使用的是Options API ，配置项式的API，我们要创建一个Vue实例，然后在里面传入一个配置对象，里面要写data、methods、watch等的东西，而Vue3提出了全新的 Composition API，组合式API，我们不用直接创建Vue实例，而是创建一个app，然后按需引入需要的API，来进行使用...
 
-1.拉开序幕的setup
+#### 1.Options API 存在的问题
+使用传统Options API（配置式API）中，新增或者修改一个需求，就需要分别在data，methods，computed里修改 。
 
-理解：Vue3.0中一个新的配置项，值为一个函数。
+[![image.png](https://i.postimg.cc/vZ6YzhjN/image.png)](https://postimg.cc/jDtYqHRH)
 
-setup是所有Composition API（组合API）“ 表演的舞台 ”。
+[![image.png](https://i.postimg.cc/W1tnfF6K/image.png)](https://postimg.cc/Mn2VnGLb)
 
-组件中所用到的：数据、方法等等，均要配置在setup中。
+#### 2.Composition API 的优势
+我们可以更加优雅的组织我们的代码，函数。让相关功能的代码更加有序的组织在一起。
 
-setup函数的两种返回值：
+[![image.png](https://i.postimg.cc/hPRv5H8q/image.png)](https://postimg.cc/7bXqCtQB)
 
-若返回一个对象，则对象中的属性、方法, 在模板中均可以直接使用。（重点关注！）
+[![image.png](https://i.postimg.cc/VLFfH5Lj/image.png)](https://postimg.cc/566WX4z0)
 
-return内简写name:name===>name
+##### 1.拉开序幕的setup
 
-若返回一个渲染函数：则可以自定义渲染内容。（了解）
+* 理解：Vue3.0中一个新的配置项，值为一个函数。
 
-注意点：
+* setup是所有Composition API（组合API）“ 表演的舞台 ”。
 
-尽量不要与Vue2.x配置混用
+* 组件中所用到的：数据、方法等等，均要配置在setup中。
 
-Vue2.x配置（data、methos、computed...）中可以访问到setup中的属性、方法。
+* setup函数的两种返回值：
 
-但在setup中不能访问到Vue2.x配置（data、methos、computed...）。
+  * 若返回一个对象，则对象中的属性、方法, 在模板中均可以直接使用。（重点关注！）【return内简写name:name===>name】
 
-如果有重名, setup优先。
+  * 若返回一个渲染函数：则可以自定义渲染内容。（了解）
 
-setup不能是一个async函数，因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个
+```javascript
+  <template>
+  <h1>博主的信息</h1>
+  <h2>姓名：{{name}}</h2>
+  <h2>年龄：{{age}}</h2>
+  <h2>性别：{{gender}}</h2>
+  <button @click="sayInfo">显示信息</button>
+</template>
 
-Promise实例，但需要Suspense和异步组件的配合）
+<script>
+// import {h} from 'vue'
+export default {
+  name: "App",
+  //此处只是测试一下setup，暂时不考虑响应式的问题。
+  setup(){
+    // 数据
+    let name = "YK菌"
+    let age = 18
+    let gender = "男"
 
-2.ref函数
+    // 方法
+    function sayInfo(){
+      alert(`你好${name}，你太厉害了吧`)
+    }
+    return {
+      name,age, gender,sayInfo
+    }
+    // return ()=> h('h1','Good Job')
+  }
+};
+</script>
+```
+
+如果返回的是渲染函数
+
+那你在template里写的模板都不奏效了，页面渲染的就是你写的h函数中的内容
+
+* 注意点：
+
+  * 尽量不要与Vue2.x配置混用
+
+    * Vue2.x配置（data、methos、computed...）中可以访问到setup中的属性、方法。
+
+    * 但在setup中不能访问到Vue2.x配置（data、methos、computed...）。
+    
+    * 如果有重名, setup优先。
+
+  * setup不能是一个async函数，因为返回值不再是return的对象, 而是promise, 模板看不到return对象中的属性。（后期也可以返回一个Promise实例，但需要Suspense和异步组件的配合）
+
+上面的数据不是响应式的数据，我们修改它，页面不会有更新，如何定义响应式的数据呢？
+
+##### 2.ref函数
 
 作用: 定义一个响应式的数据
 
-语法: const xxx = ref(initValue)
+语法: **const xxx = ref(initValue)**
 
-创建一个包含响应式数据的引用对象（reference对象，简称ref对象）。
+* 创建一个包含响应式数据的引用对象（reference对象，简称ref对象）。
 
-JS中操作数据： xxx.value
+* JS中操作数据： **xxx.value**
 
-模板中读取数据: 不需要.value，直接：<div>{{xxx}}</div>
+* 模板中读取数据: 不需要.value，直接：**<div>{{xxx}}</div>**
 
 备注：
 
-接收的数据可以是：基本类型、也可以是对象类型。
+* 接收的数据可以是：基本类型、也可以是对象类型。
 
-基本类型的数据：响应式依然是靠Object.defineProperty()的get与set完成的。
+* 基本类型的数据：响应式依然是靠**Object.defineProperty()的get与set**完成的。
 
-对象类型的数据：内部 “ 求助 ” 了Vue3.0中的一个新函数—— reactive函数。
+* 对象类型的数据：内部 “ 求助 ” 了Vue3.0中的一个新函数—— **reactive函数**。
 
-3.reactive函数
+```javascript
+<template>
+  <h1>博主的信息</h1>
+  <h2>姓名：{{ name }}</h2>
+  <h2>年龄：{{ age }}</h2>
+  <h2>职业： {{ job.type }}</h2>
+  <h2>工资：{{ job.salary }}</h2>
+  <button @click="sayInfo">显示信息</button>
+  <button @click="changeInfo">修改信息</button>
+</template>
 
-作用: 定义一个对象类型的响应式数据（基本类型不要用它，要用ref函数）
-语法：const 代理对象= reactive(源对象)接收一个对象（或数组），返回一个代理对象（Proxy的实例对象，简称proxy对象）
+<script>
+import { ref } from "vue";
+export default {
+  name: "App",
+  setup() {
+    // 数据
+    let name = ref("trumen");
+    let age = ref(18);
+    let job = ref({
+      type: "前端工程师",
+      salary: "10K",
+    });
+    // 方法
+    function sayInfo() {
+      alert(`你好${name.value}，薪水${job.value.salary}`);
+    }
+    function changeInfo() {
+      name.value = "lily";
+      age.value = 48;
+      job.value.type = "工程师";
+      job.value.salary = "200K";
+    }
+    return {
+      name,
+      age,
+      job,
+      sayInfo,
+      changeInfo,
+    };
+  },
+};
+</script>
+```
+
+通过看源码可以知道调用ref会返回一个RefImpl的实例对象，RefImpl类中有getter和setter可以检测到数据的变化
+
+##### 3.reactive函数
+
+作用: 定义一个**对象类型**的响应式数据（基本类型不要用它，要用ref函数）
+
+语法：**const 代理对象= reactive(源对象)**接收一个对象（或数组），返回一个**代理对象（Proxy的实例对象，简称proxy对象）**
+
 reactive定义的响应式数据是“深层次的”。
+
 内部基于 ES6 的 Proxy 实现，通过代理对象操作源对象内部数据进行操作。
 
+```javascript
 <template>
   <h1>博主的信息</h1>
   <h2>姓名：{{ yk.name }}</h2>
@@ -252,41 +390,38 @@ export default {
   },
 };
 </script>
-复制代码
-④ Vue3.0中的响应式原理
-Vue2.x的响应式
+```
 
+##### 4.Vue3.0中的响应式原理
+
+Vue2.x的响应式
 
 实现原理
 
+* 对象类型：通过**Object.defineProperty()**对属性的读取、修改进行拦截（数据劫持）。
 
-对象类型：通过Object.defineProperty()对属性的读取、修改进行拦截（数据劫持）。
+* 数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）。
 
-
-数组类型：通过重写更新数组的一系列方法来实现拦截。（对数组的变更方法进行了包裹）。
+```javascript
 Object.defineProperty(data, 'count', {
     get () {}, 
     set () {}
 })
-复制代码
-
-
-
+```
 
 存在问题
 
-新增属性、删除属性, 界面不会更新。
-直接通过下标修改数组, 界面不会自动更新。
+* 新增属性、删除属性, 界面不会更新。
 
-
+* 直接通过下标修改数组, 界面不会自动更新。
 
 解决方案
 
-使用Vue.set、Vue.delete或者vm.$set、vm.$delete这些API
-
-
+使用**Vue.set、Vue.delete**或者**vm.$set、vm.$delete**这些API
 
 模拟Vue2中实现响应式
+
+```javascript
 //源数据
 let person = {
 	name:'张三',
@@ -313,9 +448,13 @@ Object.defineProperty(p,'age',{
 		person.age = value
 	}
 })
-复制代码
+```
+
 Vue3.0的响应式
+
 上面例子中看到数组可以通过下标进行修改，我们再测试下增加属性和删除属性在Vue3中好不好使
+
+```javascript
 <template>
   <h1>博主的信息</h1>
   <h2>姓名：{{ yk.name }}</h2>
@@ -337,7 +476,7 @@ export default {
   setup() {
     // 数据
     let yk = reactive({
-      name: "YK菌",
+      name: "trumen",
       age: 18,
       hobby: ["写博客", "学习", "看书"],
       job: {
@@ -353,7 +492,7 @@ export default {
 
     // 方法
     function changeInfo() {
-      yk.name = "三十年后的YK菌";
+      yk.name = "lily";
       yk.age = 48;
       yk.job.type = "工程师";
       yk.job.salary = "200K";
@@ -377,29 +516,26 @@ export default {
   },
 };
 </script>
-
+```
 
 实现原理
 
-通过	Proxy（代理）:  拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
-通过Reflect（反射）:  对源对象的属性进行操作。
-MDN文档中描述的Proxy与Reflect：
+* 通过	**Proxy**（代理）:  拦截对象中任意属性的变化, 包括：属性值的读写、属性的添加、属性的删除等。
+
+* 通过  **Reflect**（反射）:  对源对象的属性进行操作。
+
+* MDN文档中描述的Proxy与Reflect：
 
 
-Proxy：developer.mozilla.org/zh-CN/docs/…
+Proxy：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Proxy
 
 
-Reflect：developer.mozilla.org/zh-CN/docs/…
+Reflect：https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Reflect
 
-
-
-
-
-
-关于代理与反射，可以看这篇博文
 模拟Vue3中实现响应式
+```javascript
 let person = {
-	name:'YK菌',
+	name:'trumen',
 	age:18
 }
 
@@ -423,64 +559,64 @@ const p = new Proxy(person,{
        return Reflect.deleteProperty(target,propName)
 	}
 })
-复制代码
-⑤ reactive对比ref
+```
+
+##### 5.reactive对比ref
 
 从定义数据角度对比
 
-ref用来定义：基本类型数据。
-reactive用来定义：对象（或数组）类型数据。
-备注：ref也可以用来定义对象（或数组）类型数据, 它内部会自动通过reactive转为代理对象。
+* ref用来定义：基本类型数据
 
+* reactive用来定义：对象（或数组）类型数据。
 
-
+* 备注：ref也可以用来定义对象（或数组）类型数据, 它内部会自动通过**reactive**转为代理对象。
 
 
 从原理角度对比
 
-ref通过类中的的getter与setter来实现响应式（数据劫持）。
-reactive通过使用Proxy来实现响应式（数据劫持）, 并通过Reflect操作源对象内部的数据。
+* ref通过类中的的getter与setter来实现响应式（数据劫持）。
 
-
-
+* reactive通过使用Proxy来实现响应式（数据劫持）, 并通过Reflect操作源对象内部的数据。
 
 
 从使用角度对比
 
-ref定义的数据：操作数据需要.value，读取数据时模板中直接读取不需要.value。
-reactive定义的数据：操作数据与读取数据：均不需要.value。
+* ref定义的数据：操作数据需要.value，读取数据时模板中直接读取不需要.value。
 
+* reactive定义的数据：操作数据与读取数据：均不需要.value。
 
-reactive也可以定义基本类型，即把用到的数据封装在一个对象里，然后用reactive封装成响应式的对象。
+* reactive也可以定义基本类型，即把用到的数据封装在一个对象里，然后用reactive封装成响应式的对象。
 
+[![image.png](https://i.postimg.cc/LXjhSWp0/image.png)](https://postimg.cc/k6X7FfDx)
 
-6.setup的两个注意点
+##### 6.setup的两个注意点
 
+* setup执行的时机
 
-setup执行的时机
+  在beforeCreate之前执行一次，this是undefined。
 
-在beforeCreate之前执行一次，this是undefined。
+* setup的参数
 
+  将setup接收的两个参数(props, context)打印在控制台，如下
+[![image.png](https://i.postimg.cc/HLVB6wgL/image.png)](https://postimg.cc/mcWYDFhx)
 
+  props：值为对象，包含：组件外部传递过来，且组件内部声明接收了的属性。
 
-setup的参数
+  context：上下文对象
 
+    attrs: 值为对象，包含：组件外部传递过来，但没有在props配置中声明的属性, 相当于 this.$attrs。
 
-将setup接收的两个参数(props, context)打印在控制台，如下
+    slots: 收到的插槽内容, 相当于 this.$slots。
 
-
-props：值为对象，包含：组件外部传递过来，且组件内部声明接收了的属性。
-context：上下文对象
-
-attrs: 值为对象，包含：组件外部传递过来，但没有在props配置中声明的属性, 相当于 this.$attrs。
-slots: 收到的插槽内容, 相当于 this.$slots。
-emit: 分发自定义事件的函数, 相当于 this.$emit。
-
-
+    emit: 分发自定义事件的函数, 相当于 this.$emit。
 
 测试一下
+
 App组件和HelloWorld组件
+
 父组件向子组件传递属性参数
+
+```javascript
 <template>
   <h1>博主的信息</h1>
   <HelloWorld msg="你好啊" school="ABC"></HelloWorld>
@@ -495,9 +631,11 @@ export default {
 </script>
 
 <style></style>
-复制代码
+```
+
+```javascript
 <template>
-  <h2>姓名：{{ yk.name }}</h2>
+  <h2>姓名：{{ trumen.name }}</h2>
 </template>
 
 <script>
@@ -507,7 +645,7 @@ export default {
   props: ['msg'], // 不写全会报警告
   setup(props, context) {
     let yk = reactive({
-      name: "YK菌",
+      name: "trumen",
     });
     console.log('props-----',props);
     console.log()
@@ -516,9 +654,10 @@ export default {
   },
 };
 </script>
-复制代码
+```
 
 自定义事件
+```javascript
 <template>
   <h1>博主的信息</h1>
   <HelloWorld @hello="showHelloMsg"></HelloWorld>
@@ -537,7 +676,9 @@ export default {
   components: { HelloWorld },
 };
 </script>
-复制代码
+```
+
+```javascript
 <template>
   <h2>姓名：{{ yk.name }}</h2>
   <button @click="test">测试触发一下HelloWorld组件的Hello事件</button>
@@ -550,7 +691,7 @@ export default {
   emits:["hello"], // 不写能执行，但是会报警告
   setup(props, context) {
     let yk = reactive({
-      name: "YK菌",
+      name: "trumen",
     });
     function test() {
       context.emit("hello", "**子组件的信息**");
@@ -559,23 +700,30 @@ export default {
   },
 };
 </script>
-复制代码
+```
 
 如果不用emits选项接收，会报警告
+
+
 插槽
+
 默认插槽
+
+```javascript
 <template>
   <h1>博主的信息</h1>
   <HelloWorld>
     <span>YK菌，你好</span>
   </HelloWorld>
 </template>
-复制代码
+```
+
+```javascript
 <template>
   <h2>姓名：{{ yk.name }}</h2>
   <slot></slot>
 </template>
-复制代码
+```
 
 具名插槽
 <template>
