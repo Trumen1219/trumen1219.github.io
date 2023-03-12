@@ -1120,20 +1120,23 @@ export default {
 具体写法：
 
 祖组件中：
+```javascript
 setup(){
 	......
     let car = reactive({name:'奔驰',price:'40万'})
     provide('car',car) // 给自己的后代组件传递数据
     ......
 }
-
+```
 后代组件中：
+```javascript
 setup(props,context){
 	......
     const car = inject('car') // 拿到祖先的数据
     return {car}
 	......
 }
+```
 
 #### 6. 响应式数据的判断
 
@@ -1149,7 +1152,7 @@ Composition API 差不多就介绍完了，此时回去再看那个动图，就�
 
 ### 6.新的组件
 
-1. Fragment
+#### 1. Fragment
 
 在Vue2中: 组件必须有一个根标签
 
@@ -1157,7 +1160,7 @@ Composition API 差不多就介绍完了，此时回去再看那个动图，就�
 
 好处: 减少标签层级, 减小内存占用
 
-2. Teleport
+#### 2. Teleport
 
 什么是Teleport？—— Teleport 是一种能够将我们的组件html结构移动到指定位置的技术。
 
@@ -1325,10 +1328,12 @@ export default {
 </template>
 ```
 这样就好了
-【图片】
-【图片】
 
-3. Suspense
+[![image.png](https://i.postimg.cc/mZJxhgQv/image.png)](https://postimg.cc/6Trbmwbc)
+
+[![image.png](https://i.postimg.cc/76SB6qwk/image.png)](https://postimg.cc/CBLCrTRP)
+
+#### 3. Suspense
 
 等待异步组件时渲染一些额外内容，让应用有更好的用户体验
 
@@ -1336,12 +1341,14 @@ export default {
 
 异步引入组件
 
-
 ```javascript
 import {defineAsyncComponent} from 'vue'
 const Child = defineAsyncComponent(()=>import('./components/Child.vue'))
+```
 
-// 使用Suspense包裹组件，并配置好default与 fallback
+ 使用Suspense包裹组件，并配置好default与 fallback
+
+```javascript
 <template>
 	<div class="app">
 		<h3>我是App组件</h3>
@@ -1361,21 +1368,17 @@ default：就是组件要显示的内容
 
 fallback：就是组件没加载完全的“备胎”
 
-延迟加载方法1：控制台调整网速slow
+延迟加载以测试方法1：控制台调整网速slow
 
-延迟加载方法2：promise
+延迟加载以测试方法2：promise
 
- 【图片】
+### 7.其他
 
-【图片】
-七、其他
-
-1.全局API的转移
+#### 1.全局API的转移
 
 Vue 2.x 有许多全局 API 和配置。
 
 例如：注册全局组件、注册全局指令等。
-
 
 ```javascript
 //注册全局组件
@@ -1394,62 +1397,30 @@ Vue.directive('focus', {
 
 Vue3.0中对这些API做出了调整：
 
-
 将全局的API，即：Vue.xxx调整到应用实例（app）上
 
+[![image.png](https://i.postimg.cc/gJKTsG5K/image.png)](https://postimg.cc/jwLcdYRW)
 
+#### 2.其他改变
 
+##### 1.data选项应始终被声明为一个函数
 
+##### 2.过渡类名的更改
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-2.x 全局 API（Vue）3.x 实例 API (app)Vue.config.xxxxapp.config.xxxxVue.config.productionTip移除Vue.componentapp.componentVue.directiveapp.directiveVue.mixinapp.mixinVue.useapp.useVue.prototypeapp.config.globalProperties
-
-
-2.其他改变
-① data选项应始终被声明为一个函数
-② 过渡类名的更改
 Vue2.x写法
+
 .v-enter,
 .v-leave-to {
   opacity: 0;
 }
+
 .v-leave,
 .v-enter-to {
   opacity: 1;
 }
 
 Vue3.x写法
+
 .v-enter-from,
 .v-leave-to {
   opacity: 0;
@@ -1460,32 +1431,68 @@ Vue3.x写法
   opacity: 1;
 }
 
-③ 移除keyCode作为 v-on 的修饰符，同时也不再支持config.keyCodes
+##### 3.移除keyCode作为 v-on 的修饰符，同时也不再支持config.keyCodes
 
-④ 移除v-on.native修饰符
+##### 4.移除v-on.native修饰符
 
-父组件中绑定事件
+* 在 Vue 3.x v-on 的 .native 修饰符将被移除。
+
+* Vue 2.x 的 .native 修饰符
+
+  * 在 Vue 2.x，如果想要在一个组件的根元素上直接监听一个原生事件，需要使用v-on 的 .native 修饰符。
+
+<base-input v-on:focus.native="onFocus"></base-input>
+
+* Vue 3.x 取消 .native 修饰符
+
+.native 修饰符在 Vue 3.x 已经移除掉了。取而代之的是，在新增的 emits 选项中定义当前组件真正触发的事件（即，组件事件）。此外，Vue 现在将所有未在组件emits 选项中定义的事件作为原生事件添加到子组件的根元素中（除非子组件选项中设置了 inheritAttrs: false）。
 
 <my-component
   v-on:close="handleComponentEvent"
   v-on:click="handleNativeClickEvent"
 />
 
-子组件中声明自定义事件
+MyComponent.vue
+
+<template>
+	<div>
+		<button v-on:click="$emit('click')">click</button>
+		<button v-on:click="$emit('close')">close</button>
+	</div>
+</template>
 <script>
   export default {
     emits: ['close']
   }
 </script>
 
-⑤ 移除过滤器（filter）
+上面代码的执行结果是：click事件会被自动添加到<div>中，所以当子组件被点击时，就会触发click事件。
+
+若改成这样：
+
+<template>
+	<div>
+		<button v-on:click="$emit('click')">click</button>
+		<button v-on:click="$emit('close')">close</button>
+	</div>
+</template>
+<script>
+  export default {
+    emits: ['close', 'click']
+  }
+</script>
+
+则click事件不会被添加给<div>。
+
+强烈建议组件中使用的所有通过emit触发的event都在emits中声明。
+
+##### 5.移除过滤器（filter）
 
 过滤器虽然这看起来很方便，但它需要一个自定义语法，打破大括号内表达式是 “只是 JavaScript” 的假设，这不仅有学习成本，而且有实现成本！建议用方法调用或计算属性去替换过滤器。
 
 参考
 
-Vue3官方文档 v3.cn.vuejs.org/
-Vite官方文档 cn.vitejs.dev/
-Vue-cli官方文档 cli.vuejs.org/zh/
-尚硅谷Vue3视频 www.bilibili.com/video/BV1Zy…
-<!-- [关于Vue3](/trumen-blog/source/aboutVue3/index.md) -->
+Vue3官方文档 [Vue3](https://cn.vuejs.org/)
+Vite官方文档 [Vite](https://cn.vitejs.dev/)
+Vue-cli官方文档 [Vue-cli](https://cli.vuejs.org/zh/)
+尚硅谷Vue3视频 [vue3-video](https://www.bilibili.com/video/BV1Zy4y1K7SH/?p=136&vd_source=366fdac7817f82df3dfc2cfe3da385cf)
