@@ -614,8 +614,7 @@ const p = new Proxy(person,{
 
 App组件和HelloWorld组件
 
-父组件向子组件传递属性参数
-
+父组件向子组件传递属性参数:
 ```javascript
 <template>
   <h1>博主的信息</h1>
@@ -635,7 +634,7 @@ export default {
 
 ```javascript
 <template>
-  <h2>姓名：{{ trumen.name }}</h2>
+  <h2>姓名：{{ p.name }}</h2>
 </template>
 
 <script>
@@ -644,19 +643,19 @@ export default {
   name: "HelloWorld",
   props: ['msg'], // 不写全会报警告
   setup(props, context) {
-    let yk = reactive({
+    let p = reactive({
       name: "trumen",
     });
     console.log('props-----',props);
     console.log()
     console.log('context.attrs-----', context.attrs)
-    return { yk };
+    return { p };
   },
 };
 </script>
 ```
 
-自定义事件
+自定义事件:
 ```javascript
 <template>
   <h1>博主的信息</h1>
@@ -680,7 +679,7 @@ export default {
 
 ```javascript
 <template>
-  <h2>姓名：{{ yk.name }}</h2>
+  <h2>姓名：{{ p.name }}</h2>
   <button @click="test">测试触发一下HelloWorld组件的Hello事件</button>
 </template>
 
@@ -690,22 +689,21 @@ export default {
   name: "HelloWorld",
   emits:["hello"], // 不写能执行，但是会报警告
   setup(props, context) {
-    let yk = reactive({
+    let p = reactive({
       name: "trumen",
     });
     function test() {
       context.emit("hello", "**子组件的信息**");
     }
-    return { yk,test };
+    return { p,test };
   },
 };
 </script>
 ```
+【如果不用emits选项接收，会报警告】
 
-如果不用emits选项接收，会报警告
 
-
-插槽
+**插槽**
 
 默认插槽
 
@@ -713,44 +711,56 @@ export default {
 <template>
   <h1>博主的信息</h1>
   <HelloWorld>
-    <span>YK菌，你好</span>
+    <span>trumen，你好</span>
   </HelloWorld>
 </template>
 ```
 
 ```javascript
 <template>
-  <h2>姓名：{{ yk.name }}</h2>
+  <h2>姓名：{{ p.name }}</h2>
   <slot></slot>
 </template>
 ```
+$slot中的值
+传入：
+[![image.png](https://i.postimg.cc/gksTM1k6/image.png)](https://postimg.cc/KRKfjqTZ)
+未传入：
+[![image.png](https://i.postimg.cc/zfstbrp4/image.png)](https://postimg.cc/HJt4RFqt)
+
 
 具名插槽
+
+在vue3中推荐使用v-slot
+[![image.png](https://i.postimg.cc/RVZR0h4N/image.png)](https://postimg.cc/14b6C9gQ)
+
+
+```javascript
 <template>
   <h1>博主的信息</h1>
   <HelloWorld>
 	<template v-slot:ykMsg>
-		<span>YK菌，你好</span>
+		<span>trumen，你好</span>
 	</template>
   </HelloWorld>
 </template>
-复制代码
+```
+
+```javascript
 <template>
-  <h2>姓名：{{ yk.name }}</h2>
-  <slot name="ykMsg"></slot>
+  <h2>姓名：{{ p.name }}</h2>
+  <slot name="trumen"></slot>
 </template>
-复制代码
+```
 
-⑦计算属性与监视
-computed函数
+##### 7.计算属性与监视
 
+**computed**函数
 
-与Vue2.x中computed配置功能一致
+* 与Vue2.x中computed配置功能一致
 
-
-写法
-
-
+* 写法
+```javascript
 import {computed} from 'vue'
 
 setup(){
@@ -771,131 +781,148 @@ setup(){
         }
     })
 }
-复制代码
-watch函数
+```
 
+**watch**函数
 
-与Vue2.x中watch配置功能一致
+* 与Vue2.x中watch配置功能一致
 
+* 两个小“坑”：
 
-两个小“坑”：
+  * 监视reactive定义的响应式数据时：oldValue无法正确获取、强制开启了深度监视（deep配置失效）。
 
-监视reactive定义的响应式数据时：oldValue无法正确获取、强制开启了深度监视（deep配置失效）。
-监视reactive定义的响应式数据中某个属性时：deep配置有效。
+  * 监视reactive定义的响应式数据中某个属性时：deep配置有效。
 
+·情况一：监视ref定义的响应式数据
 
-
-情况一：监视ref定义的响应式数据
+```javascript
 //情况一：监视ref定义的响应式数据
 watch(sum,(newValue,oldValue)=>{
 	console.log('sum变化了',newValue,oldValue)
 },{immediate:true})
-复制代码
+```
+(person.value)
+```javascript
 如果用ref定义了一个对象
 watch(person.value,(newValue,oldValue)=>{
 	console.log('person变化了',newValue,oldValue)
 }) 
-复制代码
-或者这样
+```
+或者这样(deep:true)
+```javascript
 watch(person,(newValue,oldValue)=>{
 	console.log('person变化了',newValue,oldValue)
 },{deep: true}) 
-复制代码
+```
 情况二：监视多个ref定义的响应式数据
+（用数组）
+```javascript
 //情况二：监视多个ref定义的响应式数据
 watch([sum,msg],(newValue,oldValue)=>{
 	console.log('sum或msg变化了',newValue,oldValue)
 }) 
-复制代码
+```
+
 情况三：监视reactive定义的响应式数据
 
 若watch监视的是reactive定义的响应式数据，则无法正确获得oldValue！！
+
 若watch监视的是reactive定义的响应式数据，则强制开启了深度监视
 
+```javascript
 watch(person,(newValue,oldValue)=>{
 	console.log('person变化了',newValue,oldValue)
 },{immediate:true,deep:false}) //此处的deep配置不再奏效
-复制代码
+```
+
 情况四：监视reactive定义的响应式数据中的某个属性
+(箭头函数)
+```javascript
 //情况四：监视reactive定义的响应式数据中的某个属性
 watch(()=>person.job,(newValue,oldValue)=>{
 	console.log('person的job变化了',newValue,oldValue)
 },{immediate:true,deep:true}) 
-复制代码
+```
+
 情况五：监视reactive定义的响应式数据中的某些属性
+(数组中放见体育函数)
+```javascript
 //情况五：监视reactive定义的响应式数据中的某些属性
 watch([()=>person.job,()=>person.name],(newValue,oldValue)=>{
 	console.log('person的job变化了',newValue,oldValue)
 },{immediate:true,deep:true})
-复制代码
+```
 特殊情况
+```javascript
 //特殊情况
 watch(()=>person.job,(newValue,oldValue)=>{
     console.log('person的job变化了',newValue,oldValue)
 },{deep:true}) //此处由于监视的是reactive素定义的对象中的某个属性，所以deep配置有效
-复制代码
-watchEffect函数
+```
 
+**watchEffect**函数
 
-watch的套路是：既要指明监视的属性，也要指明监视的回调。
+* watch的套路是：既要指明监视的属性，也要指明监视的回调。
 
+* watchEffect的套路是：不用指明监视哪个属性，监视的回调中用到哪个属性，那就监视哪个属性。
 
-watchEffect的套路是：不用指明监视哪个属性，监视的回调中用到哪个属性，那就监视哪个属性。
+* watchEffect有点像computed：
 
+  * 但computed注重的是计算出来的值（回调函数的返回值），所以必须要写返回值。
 
-watchEffect有点像computed：
-
-但computed注重的计算出来的值（回调函数的返回值），所以必须要写返回值。
-而watchEffect更注重的是过程（回调函数的函数体），所以不用写返回值。
-
-
-
+  * 而watchEffect更注重的是过程（回调函数的函数体），所以不用写返回值。
+```javascript
 //watchEffect所指定的回调中用到的数据只要发生变化，则直接重新执行回调。
 watchEffect(()=>{
     const x1 = sum.value
     const x2 = person.age
     console.log('watchEffect配置的回调执行了')
 })
-复制代码
-⑧ 生命周期
+```
 
+##### 8.生命周期
 
-Vue3.0中可以继续使用Vue2.x中的生命周期钩子，但有有两个被更名：
+[![image.png](https://i.postimg.cc/nL3mgY92/image.png)](https://postimg.cc/kVtDtScR)
 
-beforeDestroy改名为 beforeUnmount
-destroyed改名为 unmounted
+Vue3.0中可以继续使用Vue2.x中的生命周期钩子，但有两个被更名：
 
+* beforeDestroy改名为 beforeUnmount
 
+* destroyed改名为 unmounted
 
-可以直接已配置项的形式使用生命周期钩子，也可以使用组合式API的形式使用，尽量统一
+可以直接使用已配置项的形式使用生命周期钩子，也可以使用组合式API的形式使用，尽量统一
+
 一般来说，组合式API里的钩子会比配置项的钩子先执行，组合式API的钩子名字有变化
 
 Vue3.0也提供了 Composition API 形式的生命周期钩子，与Vue2.x中钩子对应关系如下：
 
-beforeCreate===>setup()
-created=======>setup()
-beforeMount ===>onBeforeMount
-mounted=======>onMounted
-beforeUpdate===>onBeforeUpdate
-updated =======>onUpdated
-beforeUnmount ==>onBeforeUnmount
-unmounted =====>onUnmounted
+ * beforeCreate===>setup()
+
+ * created=======>setup()
+ 
+ * beforeMount ===>onBeforeMount
+ 
+ * mounted=======>onMounted
+ 
+ * beforeUpdate===>onBeforeUpdate
+ 
+ * updated =======>onUpdated
+ 
+ * beforeUnmount ==>onBeforeUnmount
+ 
+ * unmounted =====>onUnmounted
 
 
+##### 9.自定义hook函数（重点）
 
-⑨ 自定义hook函数（重点）
-
-
-什么是hook？—— 本质是一个函数，把setup函数中使用的Composition API进行了封装。
-
+什么是**hook**？—— 本质是一个函数，把setup函数中使用的Composition API进行了封装。
 
 类似于vue2.x中的mixin。
 
-
 自定义hook的优势: 复用代码, 让setup中的逻辑更清楚易懂。
 
-
 创建一个hooks文件夹，里面创建文件usePoint.js
+```javascript
 import { reactive, onMounted, onBeforeUnmount } from "vue";
 export default function() {
   //实现鼠标“打点”相关的数据
@@ -922,8 +949,9 @@ export default function() {
 
   return point;
 }
-复制代码
+```
 在组件种使用
+```javascript
 <template>
 	<h2>我是HelloWorld组件</h2>
 	<h2>当前点击时鼠标的坐标为：x：{{point.x}}，y：{{point.y}}</h2>
@@ -939,23 +967,18 @@ export default function() {
 		}
 	}
 </script>
-复制代码
+```
 
-⑩ toRef
-
+##### 10.toRef
 
 作用：创建一个 ref 对象，其value值指向另一个对象中的某个属性。
 
-
 语法：const name = toRef(person,'name')
-
 
 应用:   要将响应式对象中的某个属性单独提供给外部使用时。
 
-
 扩展：toRefs与toRef功能一致，但可以批量创建多个 ref 对象，语法：toRefs(person)
-
-
+```javascript
 <template>
 	<h4>{{person}}</h4>
 	<h2>姓名：{{name}}</h2>
@@ -1001,61 +1024,53 @@ export default function() {
 		}
 	}
 </script>
-复制代码
-五、其它 Composition API
-1. shallowReactive 与 shallowRef
+```
+### 5.其它 Composition API
 
+#### 1. shallowReactive 与 shallowRef
 
 shallowReactive：只处理对象最外层属性的响应式（浅响应式）。
 
-
 shallowRef：只处理基本数据类型的响应式, 不进行对象的响应式处理。
-
 
 什么时候使用?
 
 如果有一个对象数据，结构比较深, 但变化时只是外层属性变化 ===> shallowReactive。
+
 如果有一个对象数据，后续功能不会修改该对象中的属性，而是生新的对象来替换 ===> shallowRef。
 
-
-
-2. readonly 与 shallowReadonly
+#### 2. readonly 与 shallowReadonly
 
 readonly: 让一个响应式数据变为只读的（深只读）。
-shallowReadonly：让一个响应式数据变为只读的（浅只读）。
+
+shallowReadonly：让一个响应式数据变为只读的（浅只读）。【深层次可修改】
+
 应用场景: 不希望数据被修改时。
 
-3. toRaw 与 markRaw
-
+#### 3. toRaw 与 markRaw
 
 toRaw
 
-作用：将一个由reactive生成的响应式对象转为普通对象。
-使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。
+* 作用：将一个由reactive生成的响应式对象转为普通对象。
 
-
+* 使用场景：用于读取响应式对象对应的普通对象，对这个普通对象的所有操作，不会引起页面更新。【不需要追踪，不需要更新UI界面】
 
 markRaw
 
-作用：标记一个对象，使其永远不会再成为响应式对象。
-应用场景:
+* 作用：标记一个对象，使其永远不会再成为响应式对象。
 
-有些值不应被设置为响应式的，例如复杂的第三方类库等。
-当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
+*应用场景:
 
+  *有些值不应被设置为响应式的，例如复杂的第三方类库等。
 
+  * 当渲染具有不可变数据源的大列表时，跳过响应式转换可以提高性能。
 
+#### 4. customRef
 
+* 作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行显式控制。
 
-4. customRef
-
-
-作用：创建一个自定义的 ref，并对其依赖项跟踪和更新触发进行显式控制。
-
-
-实现防抖效果
-
-
+* 实现防抖效果
+```javascript
 <template>
   <input type="text" v-model="keyWord" />
   <h3>{{ keyWord }}</h3>
@@ -1095,18 +1110,14 @@ export default {
   },
 };
 </script>
-复制代码
-5. provide 与 inject
-
-
+```
+#### 5. provide 与 inject
 
 作用：实现祖与后代组件间通信
 
 套路：父组件有一个 provide 选项来提供数据，后代组件有一个 inject 选项来开始使用这些数据
 
-
 具体写法：
-
 
 祖组件中：
 setup(){
@@ -1124,17 +1135,20 @@ setup(props,context){
 	......
 }
 
-6. 响应式数据的判断
+#### 6. 响应式数据的判断
 
 isRef: 检查一个值是否为一个 ref 对象
-isReactive: 检查一个对象是否是由 reactive 创建的响应式代理
-isReadonly: 检查一个对象是否是由 readonly 创建的只读代理
-isProxy: 检查一个对象是否是由 reactive 或者 readonly 方法创建的代理
 
+isReactive: 检查一个对象是否是由 reactive 创建的响应式代理
+
+isReadonly: 检查一个对象是否是由 readonly 创建的只读代理
+
+isProxy: 检查一个对象是否是由 reactive 或者 readonly 方法创建的代理
 
 Composition API 差不多就介绍完了，此时回去再看那个动图，就会感觉Vue3真香！
 
-六、新的组件
+### 6.新的组件
+
 1. Fragment
 
 在Vue2中: 组件必须有一个根标签
